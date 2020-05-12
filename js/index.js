@@ -15,7 +15,9 @@ const getData = async () => {
 
   try {
     const response = await fetch(API);
-    return await response.json();
+
+    if (response.ok) return await response.json();
+    else window.location.reload(true);
   } catch (error) {
     console.error(error);
   }
@@ -87,26 +89,24 @@ if (sessionStorage.getItem("countriesInfo") === null) {
       };
 
       sessionStorage.setItem("countriesInfo", JSON.stringify(countriesInfo));
-
-      map.addEventListener("mousemove", (e) => {
-        const target = e.target;
-        const countriesInfo = JSON.parse(
-          sessionStorage.getItem("countriesInfo")
-        );
-
-        if (target.id !== "map") {
-          const country = selectedCountry(countriesInfo, target);
-
-          fillCountry(target);
-          positionPopUp(getMousePosition(e));
-          createPopUp(country);
-        } else {
-          popUp.style.transform = `scale(0)`;
-          return;
-        }
-      });
     } catch (error) {
       console.error(error);
     }
   });
 }
+
+map.addEventListener("mousemove", (e) => {
+  const target = e.target;
+  const countriesInfo = JSON.parse(sessionStorage.getItem("countriesInfo"));
+
+  if (target.id !== "map") {
+    const country = selectedCountry(countriesInfo, target);
+
+    fillCountry(target);
+    positionPopUp(getMousePosition(e));
+    createPopUp(country);
+  } else {
+    popUp.style.transform = `scale(0)`;
+    return;
+  }
+});
