@@ -6,9 +6,9 @@ const container = document.querySelector(".container"),
 const getWindowSize = () => {
   return {
     windowX: window.innerWidth,
-    windowY: window.innerHeight
-  }
-}
+    windowY: window.innerHeight,
+  };
+};
 
 const getData = async () => {
   const API = "https://api.covid19api.com/summary";
@@ -20,22 +20,6 @@ const getData = async () => {
     console.error(error);
   }
 };
-
-if (sessionStorage.getItem("countriesInfo") === null) {
-  getData().then(({ Global, Countries, Date }) => {
-    try {
-      const countriesInfo = {
-        global: Global,
-        countries: Countries,
-        date: Date,
-      };
-
-      sessionStorage.setItem("countriesInfo", JSON.stringify(countriesInfo));
-    } catch (error) {
-      console.error(error);
-    }
-  });
-}
 
 const selectedCountry = ({ countries }, target) => {
   const country = countries.find((country) => target.id == country.CountryCode);
@@ -57,7 +41,7 @@ const getMousePosition = (e) => {
 
 const numberWithCommas = (x) => {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
+};
 
 const createPopUp = ({ Country, TotalConfirmed }) => {
   const name = document.querySelector(".container__popUp__name"),
@@ -76,10 +60,10 @@ const positionPopUp = ({ mouseX, mouseY }) => {
     windowY = getWindowSize().windowY;
 
   if (mouseY < windowY / 2) offsetY = OFFSET;
-  else offsetY = -2*OFFSET;
+  else offsetY = -2 * OFFSET;
 
   if (mouseX < windowX / 2) offsetX = OFFSET;
-  else offsetX = -6*OFFSET;
+  else offsetX = -6 * OFFSET;
 
   popUp.style.transform = `scale(1)`;
   popUp.style.top = `${mouseY + offsetY}px`;
@@ -87,22 +71,42 @@ const positionPopUp = ({ mouseX, mouseY }) => {
 };
 
 const fillCountry = (target) => {
-    target.setAttribute("fill", "red");
-    target.addEventListener("mouseout", (e) => e.target.setAttribute("fill", "black"));
+  target.setAttribute("fill", "red");
+  target.addEventListener("mouseout", (e) =>
+    e.target.setAttribute("fill", "black")
+  );
 };
 
-map.addEventListener("mousemove", (e) => {
-  const target = e.target;
-  const countriesInfo = JSON.parse(sessionStorage.getItem("countriesInfo"));
+if (sessionStorage.getItem("countriesInfo") === null) {
+  getData().then(({ Global, Countries, Date }) => {
+    try {
+      const countriesInfo = {
+        global: Global,
+        countries: Countries,
+        date: Date,
+      };
 
-  if (target.id !== "map") {
-    const country = selectedCountry(countriesInfo, target);
+      sessionStorage.setItem("countriesInfo", JSON.stringify(countriesInfo));
 
-    fillCountry(target);
-    positionPopUp(getMousePosition(e));
-    createPopUp(country);
-  } else {
-    popUp.style.transform = `scale(0)`;
-    return;
-  }
-});
+      map.addEventListener("mousemove", (e) => {
+        const target = e.target;
+        const countriesInfo = JSON.parse(
+          sessionStorage.getItem("countriesInfo")
+        );
+
+        if (target.id !== "map") {
+          const country = selectedCountry(countriesInfo, target);
+
+          fillCountry(target);
+          positionPopUp(getMousePosition(e));
+          createPopUp(country);
+        } else {
+          popUp.style.transform = `scale(0)`;
+          return;
+        }
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  });
+}
